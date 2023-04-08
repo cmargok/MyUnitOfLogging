@@ -15,48 +15,59 @@ namespace UnitOfLogging
     {
         public static UnitOfLogging UseUnitOfLogging(this IServiceCollection services)
         {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
             return new UnitOfLogging(services);
         }
     }
 
     public class UnitOfLogging {
 
-       
+
         private LoggingSettings? _loggingSettings;
         private LoggingConfiguration _Loggerconfig;
         private readonly IServiceCollection _Services;
-        private Dictionary<LoggingTarget, string> LoggersNames;
+        private Dictionary<LoggingTarget, string> _LoggersNames;
+
+
         public UnitOfLogging(IServiceCollection services)
         {
             _Services = services;
-            _Loggerconfig = new LoggingConfiguration(); 
+            _Loggerconfig = new LoggingConfiguration();
+            _LoggersNames = new Dictionary<LoggingTarget, string>();
         }
 
-        public UnitOfLogging UseMyUnitOfLogging(IConfiguration configuration, Action<LoggerManagerOptions> configureOptions = null)
+        public UnitOfLogging UseMyUnitOfLogging(IConfiguration configuration, Action<LoggerManagerOptions> configureOptions)
         {
+            if (configureOptions is null) throw new ArgumentNullException(nameof(UseMyUnitOfLogging));
 
             _Services.AddLogging(logging =>
             {
                 logging.ClearProviders();
                 logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
             });
-            if(configureOptions != null) {
+            var options = new LoggerManagerOptions();
+            configureOptions(options);
 
-                var options = new LoggerManagerOptions();
-                configureOptions(options);
-
-                if (String.IsNullOrEmpty(options.LogSectionName))
-                {
-                    ArgumentNullException argumentNullException = new("No name was given.", nameof(options.LogSectionName));
-                    throw argumentNullException;
-                }
-
-                _Services.Configure<LoggingSettings>(configuration.GetSection(options.LogSectionName));
-                _loggingSettings = new LoggingSettings();
-                configuration.GetSection(options.LogSectionName).Bind(_loggingSettings);
+            if (string.IsNullOrEmpty(options.LogSectionName))
+            {
+                ArgumentNullException argumentNullException = new("No name was given.", nameof(options.LogSectionName));
+                throw argumentNullException;
             }
-            SetRuleTargetsName();
+
+            _Services.Configure<LoggingSettings>(configuration.GetSection(options.LogSectionName));
+
+            _loggingSettings = new LoggingSettings();
+            configuration.GetSection(options.LogSectionName).Bind(_loggingSettings);
+
+            _LoggersNames = SetRuleTargetsName(_LoggersNames);  
+
+            options.SetDictionary(_LoggersNames);                
+
             _Services.AddSingleton<IApiLogger, LoggerManager>();
+
             return this;
         }
 
@@ -77,11 +88,11 @@ namespace UnitOfLogging
 
                     if (options.DefaultConsoleLogSettings)
                     {
-                        _Loggerconfig = targetsConfig.AddDefaultColoredConsoleTarget(_Loggerconfig, LoggersNames[LoggingTarget.Console]);
+                        _Loggerconfig = targetsConfig.AddDefaultColoredConsoleTarget(_Loggerconfig, _LoggersNames[LoggingTarget.Console]);
                     }
                     else
                     {
-                        _Loggerconfig = targetsConfig.AddCustomConsoleTarget(_Loggerconfig, options.ConsoleConfiguration.ConsoleTargetConfig!, LoggersNames[LoggingTarget.Console]);
+                        _Loggerconfig = targetsConfig.AddCustomConsoleTarget(_Loggerconfig, options.ConsoleConfiguration.ConsoleTargetConfig!, _LoggersNames[LoggingTarget.Console]);
                     }
                 }
 
@@ -105,17 +116,17 @@ namespace UnitOfLogging
 
                 if (TargetsOptions.ConsoleLog)
                 {   
-                    _Loggerconfig = Config.AddDefaultColoredConsoleTarget(_Loggerconfig, LoggersNames[LoggingTarget.Console]);
+                    _Loggerconfig = Config.AddDefaultColoredConsoleTarget(_Loggerconfig, _LoggersNames[LoggingTarget.Console]);
                 }
 
                 if (TargetsOptions.FileLog)
                 {
-                    _Loggerconfig = Config.AddDefaultFileTarget(_Loggerconfig, LoggersNames[LoggingTarget.File]);
+                    _Loggerconfig = Config.AddDefaultFileTarget(_Loggerconfig, _LoggersNames[LoggingTarget.File]);
                 }
 
                 if (TargetsOptions.SeqLog)
                 {
-                    _Loggerconfig = Config.AddDefaultSeqTarget(_Loggerconfig, LoggersNames[LoggingTarget.Seq]);
+                    _Loggerconfig = Config.AddDefaultSeqTarget(_Loggerconfig, _LoggersNames[LoggingTarget.Seq]);
                 }
 
             }
@@ -143,14 +154,15 @@ namespace UnitOfLogging
 
 
 
-        private void SetRuleTargetsName()
+        private Dictionary<LoggingTarget, string> SetRuleTargetsName(Dictionary<LoggingTarget, string> LoggersNames)
         {
-            LoggersNames = new();
 
-            if (_loggingSettings?.Loggers.Count  == 0)
+            LoggersNames.Clear();
+
+            if (_loggingSettings?.Loggers.Count == 0)
             {
                 LoggersNames.Add(LoggingTarget.Console, "ConsoleLogger");
-                return;
+                return LoggersNames;
             }
 
             foreach (LoggingTarget target in Enum.GetValues(typeof(LoggingTarget)))
@@ -158,7 +170,7 @@ namespace UnitOfLogging
                 var name = _loggingSettings?.Loggers.FirstOrDefault(c => c.Target == target)?.Name ?? $"{target}Logger";
                 LoggersNames.Add(target, name);
             }
-
+            return LoggersNames;
         }
 
     }
@@ -180,8 +192,19 @@ namespace UnitOfLogging
 
         private LoggingConfiguration _Loggerconfig;
 
-        private Dictionary<LoggingTarget, string> LoggersNames;
-        public void AddTargets(Action<MyCustomLoggingConfiguration> Targets = null!, Dictionary<LoggingTarget, string> LoggersNames = null!)
+        private Dictionary<LoggingTarget, string> _LoggersNames;
+
+
+        public LoggerManagerOptions()
+        {
+
+            _Loggerconfig = new();
+        }
+
+
+
+
+        public void AddTargets(Action<MyCustomLoggingConfiguration> Targets = null!)
         {
             _Loggerconfig = new LoggingConfiguration();
             if (Targets != null)
@@ -197,14 +220,18 @@ namespace UnitOfLogging
 
                     if (options.DefaultConsoleLogSettings)
                     {
-                        _Loggerconfig = targetsConfig.AddDefaultColoredConsoleTarget(_Loggerconfig, LoggersNames[LoggingTarget.Console]);
+                        _Loggerconfig = targetsConfig.AddDefaultColoredConsoleTarget(_Loggerconfig, _LoggersNames[LoggingTarget.Console]);
                     }
                     else
                     {
-                        _Loggerconfig = targetsConfig.AddCustomConsoleTarget(_Loggerconfig, options.ConsoleConfiguration.ConsoleTargetConfig!, LoggersNames[LoggingTarget.Console]);
+                        _Loggerconfig = targetsConfig.AddCustomConsoleTarget(_Loggerconfig, options.ConsoleConfiguration.ConsoleTargetConfig!, _LoggersNames[LoggingTarget.Console]);
                     }
                 }
             }
+        }
+        public void SetDictionary(Dictionary<LoggingTarget, string> data)
+        {
+            _LoggersNames = data;
         }
 
 

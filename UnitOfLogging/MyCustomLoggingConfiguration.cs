@@ -83,8 +83,8 @@ namespace UnitOfLogging
             fileTarget.FileName = "${basedir}/logs/${shortdate}.log";
             fileTarget.Layout = "${longdate} ${uppercase:${level}} ${logger} ${message}";
 
-            config.AddTarget("file", fileTarget);
-            config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, fileTarget));
+          //  config.AddTarget("file", fileTarget);
+          //  config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, fileTarget));
 
             return loggerconfig;
 
@@ -118,8 +118,8 @@ namespace UnitOfLogging
 
             seqContainer.WrappedTarget = seqTarget;
 
-            config.AddTarget("file", fileTarget);
-            config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, fileTarget));
+          //  config.AddTarget("file", fileTarget);
+           // config.LoggingRules.Add(new LoggingRule("*", LogLevel.Debug, fileTarget));
 
             return loggerconfig;
 
