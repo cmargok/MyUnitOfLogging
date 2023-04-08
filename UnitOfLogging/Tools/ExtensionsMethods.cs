@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
-using UnitOfLogging.Logging;
+using UnitOfLogging.Models.ExplicitConfiguration;
 
-namespace UnitOfLogging
-{   
+namespace UnitOfLogging.Tools
+{
     public static class ExtensionsMethods
     {
         public static string GetDescription(this Enum enumType)
@@ -26,22 +26,32 @@ namespace UnitOfLogging
             if (Enum.IsDefined(typeof(Enum), targetString))
             {
                 return true;
-            }           
+            }
 
             return false;
         }
 
         public static LoggingTarget MapToLoggingTarget(string targetString)
         {
-            if (Enum.TryParse<LoggingTarget>(targetString, true, out LoggingTarget target))
+            if (Enum.TryParse(targetString, true, out LoggingTarget target))
             {
                 return target;
             }
 
             return LoggingTarget.None;
         }
+
+        public static string GetKey(Dictionary<LoggingTarget, string> _LoggersNames, LoggingTarget target)
+        {
+            if (!_LoggersNames.TryGetValue(target, out var key))
+            {
+                key = $"{target}Logger_default";
+                _LoggersNames.Add(target, key);
+            }
+            return key;
+        }
     }
-    
-    
+
+
 
 }

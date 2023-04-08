@@ -1,23 +1,29 @@
 ﻿
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using UnitOfLogging.Models.ExplicitConfiguration;
 
 namespace UnitOfLogging.Logging
 {
-    public sealed class LoggerManager : IApiLogger
+   /* public interface ILoggerManager : IMyLogger
+    {
+        public void AddDefaultLoggers(ILoggerFactory loggerFactory, Dictionary<LoggingTarget, string> loggersNames);
+    }*/
+    public sealed class LoggerManager : IMyLogger
     {
 
-        private readonly List<IApiLogger> _apiLoggers;
+        private readonly List<IMyLogger> _apiLoggers;
         private readonly LoggingSettings _loggingSettings;
+        private readonly Dictionary<LoggingTarget, string> _loggers;
 
-        public LoggerManager(ILoggerFactory loggerFactory, IOptions<LoggingSettings> settings)
+
+        public LoggerManager(ILoggerFactory loggerFactory, LoggingSettings settings)
         {
-            _apiLoggers = new List<IApiLogger>();
-            _loggingSettings = settings.Value;
+            _apiLoggers = new List<IMyLogger>();
+            _loggingSettings = settings;
+            _loggers = new();
             InitializeLoggers(loggerFactory);
         }
-
-
 
         private void InitializeLoggers(ILoggerFactory loggerFactory)
         {
@@ -25,9 +31,29 @@ namespace UnitOfLogging.Logging
             {
                 foreach (var logger in _loggingSettings.GetActiveLoggers())
                 {
-                    _apiLoggers.Add(new ApiLogger(loggerFactory, logger));
+
+                    _apiLoggers.Add(new MyLogger(loggerFactory, logger.Name));
+                    _loggers.Add(logger.Target, logger.Name);
                 }
             }
+
+        }
+
+        public void AddDefaultLoggers(ILoggerFactory loggerFactory, Dictionary<LoggingTarget, string> loggersNames)
+        {
+            if (_loggingSettings.LoggingActive)
+            {
+
+                foreach (var logger in loggersNames)
+                {
+                    if (_loggers.TryAdd(logger.Key, logger.Value)) {
+
+                        _apiLoggers.Add(new MyLogger(loggerFactory, logger.Value)); 
+                    }
+
+                }
+            }            
+
         }
 
 

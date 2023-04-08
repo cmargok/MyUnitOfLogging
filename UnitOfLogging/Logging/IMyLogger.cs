@@ -4,7 +4,7 @@ using NLog.Layouts;
 
 namespace UnitOfLogging.Logging
 {
-    public interface IApiLogger
+    public interface IMyLogger
     {
         public void LoggingWarning(string message);
         public void LoggingInformation(string message);

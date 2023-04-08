@@ -1,29 +1,32 @@
+using Microsoft.AspNetCore.Mvc;
+using NLog.Web;
 using UnitOfLogging;
+using UnitOfLogging.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Host.UseNLog();
 
 
-
-builder.Services.UseUnitOfLogging().UseMyUnitOfLogging(builder.Configuration, options =>
-{
-    options.LogSectionName = "LogSettings";
-    options.AddTargets(po =>
+builder.Services.UseUnitOfLogging().UseMyUnitOfLogging(builder.Configuration, "LogSettings"/*,
+    options =>  
     {
-        po.DefaultConsoleLogSettings = true;
-        po.ConsoleConfiguration.ConsoleTargetConfig = new NLog.Targets.ColoredConsoleTarget
+        options.AddTargets(tg =>
         {
+            tg.AddConsoleLogging(col =>
+            {
+                col.DefaultConsoleLogSettings = true;
+                col.IsActive = true;
+            });
+           // tg.AddDefaultFileLogging();
+        
+        });
 
-        };
-    });
-});
+        
 
-
-
-
-
-
+    }*/
+).UseDefaultPresets(c => c.SeqLog = false).InitLoggers();
 
 
 

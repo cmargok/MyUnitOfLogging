@@ -4,11 +4,11 @@ using System.Runtime;
 
 namespace UnitOfLogging.Logging
 {
-    internal class ApiLogger : IApiLogger
+    internal class MyLogger : IMyLogger
     {
         private readonly ILogger _logger;
 
-        internal ApiLogger(ILoggerFactory loggerFactory, string NameLogger)
+        internal MyLogger(ILoggerFactory loggerFactory, string NameLogger)
         {
             _logger = loggerFactory.CreateLogger(NameLogger);
         }
