@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NLog;
 using UnitOfLogging.Models.ExplicitConfiguration;
 
 namespace UnitOfLogging.Logging
@@ -12,20 +13,23 @@ namespace UnitOfLogging.Logging
     public sealed class LoggerManager : IMyLogger
     {
 
-        private readonly List<IMyLogger> _apiLoggers;
-        private readonly LoggingSettings _loggingSettings;
-        private readonly Dictionary<LoggingTarget, string> _loggers;
+        private List<IMyLogger> _apiLoggers;
+      //  private readonly LoggingSettings _loggingSettings;
+        //private readonly Dictionary<LoggingTarget, string> _loggers;
+        private bool IsLoggingActive = false;
 
-
-        public LoggerManager(ILoggerFactory loggerFactory, LoggingSettings settings)
+        public LoggerManager(ILoggerFactory loggerFactory)
         {
             _apiLoggers = new List<IMyLogger>();
-            _loggingSettings = settings;
-            _loggers = new();
-            InitializeLoggers(loggerFactory);
+           // _loggingSettings = settings;
+            //_loggers = new();
+           // InitializeLoggers(loggerFactory);
         }
-
-        private void InitializeLoggers(ILoggerFactory loggerFactory)
+        public LoggerManager()
+        {
+            _apiLoggers = new List<IMyLogger>();
+        }
+        /*private void InitializeLoggers(ILoggerFactory loggerFactory)
         {
             if (_loggingSettings.LoggingActive)
             {
@@ -36,58 +40,41 @@ namespace UnitOfLogging.Logging
                     _loggers.Add(logger.Target, logger.Name);
                 }
             }
+        }*/
 
-        }
-
-        public void AddDefaultLoggers(ILoggerFactory loggerFactory, Dictionary<LoggingTarget, string> loggersNames)
-        {
-            if (_loggingSettings.LoggingActive)
-            {
-
-                foreach (var logger in loggersNames)
-                {
-                    if (_loggers.TryAdd(logger.Key, logger.Value)) {
-
-                        _apiLoggers.Add(new MyLogger(loggerFactory, logger.Value)); 
-                    }
-
-                }
-            }            
-
-        }
+        public void SetLoggers(List<IMyLogger>  value) => _apiLoggers = value;
+      
+        public void Activate() => IsLoggingActive = true;
 
 
 
         public void LoggingInformation(string message)
         {
-            if (_loggingSettings.LoggingActive)
+            if (IsLoggingActive)
             {
-                foreach (var logger in _apiLoggers)
-                {
-                    logger.LoggingInformation(message);
-                }
+                //foreach(var logger in _apiLoggers)
+                //{
+                //    logger.LoggingInformation(message);
+                //}
+                _apiLoggers.ForEach(logger => logger.LoggingInformation(message));
             }
         }
 
         public void LoggingWarning(string message)
         {
-            if (_loggingSettings.LoggingActive)
+            if (IsLoggingActive)
             {
-                foreach (var logger in _apiLoggers)
-                {
-                    logger.LoggingWarning(message);
-                }
+                _apiLoggers.ForEach(logger => logger.LoggingWarning(message));
+               
             }
         }
 
         public void LoggingError(Exception ex, string message)
         {
-            if (_loggingSettings.LoggingActive)
+            if (IsLoggingActive)
             {
-                foreach (var logger in _apiLoggers)
-                {
-                    logger.LoggingError(ex, message);
-                }
+                _apiLoggers.ForEach(logger => logger.LoggingError(ex,message));
+              
             }
         }
 

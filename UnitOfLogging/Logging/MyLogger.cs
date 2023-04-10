@@ -15,6 +15,7 @@ namespace UnitOfLogging.Logging
 
         public void LoggingInformation(string message)
         {
+            
             _logger.LogInformation(message);
         }
 

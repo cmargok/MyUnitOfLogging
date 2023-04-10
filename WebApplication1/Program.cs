@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using NLog.Web;
 using UnitOfLogging;
 using UnitOfLogging.Logging;
@@ -8,20 +9,18 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Host.UseNLog();
 
-
 builder.Services
-    .UseUnitOfLogging()
+    .UseUnitOfLogging(builder.Configuration.GetSection("LogSettings"))
     .Configure(opt => opt.UseDefaultPresets(c => c.SeqLog = false))
     .InitLoggers();
-
+/*
 
 builder.Services
     .UseUnitOfLogging()
-    .UseJsonSettings(builder.Configuration,"LogSettings")
     .Configure(opt => opt.UseDefaultPresets())
     .InitLoggers(); 
 
-
+*/
 
 //builder.Services.UseUnitOfLogging().UseMyUnitOfLogging(builder.Configuration, "LogSettings"/*,
 //    options =>  
