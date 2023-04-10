@@ -17,11 +17,28 @@ using LogLevel = NLog.LogLevel;
 
 namespace UnitOfLogging.Core
 {
-
+   
     public class UnitOfLog
     {
-        private LoggingSettings? _loggingSettings;
+        private enum FromSettings
+        {
+            AppSettings,
+            Mixed,
+            Code
+        }
+        //properties
+
+        private bool DefaultPresets = true;
+        private bool SettingsFromJson = false;
+        private FromSettings SettingsFrom = FromSettings.Code;
+        private bool ConfigureLaunched = false;
+        private bool IsLoggingActive = false;
+        private bool IsConfigurationComplete = false;
+        private LoggingSettings? _JsonSettings;
+
+
         private LoggingConfiguration _Loggerconfig;
+
         private readonly IServiceCollection _Services;
         private Dictionary<LoggingTarget, string> _LoggersNames;
         private List<string> DefaultLogsNames;
@@ -33,45 +50,65 @@ namespace UnitOfLogging.Core
             DefaultLogsNames = new List<string>();
         }
 
-        public UnitOfLog UseMyUnitOfLogging(IConfiguration configuration, string SectionPart, Action<LoggerManagerOptions> configureOptions = null!)
-        {           
 
+        public UnitOfLog UseJsonSettings(IConfiguration configuration, string SectionPart, bool IsActive = true)
+        {
             if (string.IsNullOrEmpty(SectionPart))
             {
-                ArgumentNullException argumentNullException = new (nameof(SectionPart), "No name was given.");
+                ArgumentNullException argumentNullException = new(nameof(SectionPart), "No name was given.");
+                throw argumentNullException;
+            }
+            SettingsFromJson = true;
+            this.SettingsFrom = FromSettings.AppSettings;
+            _JsonSettings = new LoggingSettings();
+            configuration.GetSection(SectionPart).Bind(_JsonSettings);
+
+            if (_JsonSettings is null || _JsonSettings.Loggers is null || !_JsonSettings.Loggers!.Any())
+            {
+                ArgumentNullException argumentNullException = new(nameof(SectionPart), "AppSettings was no configured correctly");
                 throw argumentNullException;
             }
 
+            return this;
+        }
+
+
+        public UnitOfLog Configure(Action<MyLoggerOptions> configureOptions = null!)
+        {           
+            if(this.SettingsFrom.Equals(FromSettings.AppSettings) && (_JsonSettings is null || _JsonSettings.Loggers is null)) { 
+                ArgumentNullException argumentNullException = new(nameof(Configure), "AppSettings was no configured correctly");
+                throw argumentNullException; 
+            }        
+
+            this.ConfigureLaunched = true;
+            this.IsLoggingActive = true;
 
             _Services.AddLogging(logging =>
             {
                 logging.ClearProviders();
                 logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
               
-            }); 
-
-            _loggingSettings = new LoggingSettings();
-
-            configuration.GetSection(SectionPart).Bind(_loggingSettings);
-
-            _LoggersNames = SetRuleTargetsName(_LoggersNames);
-
+            });                   
+            
             if(configureOptions != null)
             {
-                var options = new LoggerManagerOptions(_LoggersNames);
+                _LoggersNames = SetRuleTargetsName();
+                var options = new MyLoggerOptions(_LoggersNames);
+                if (this.SettingsFromJson)
+                {
+                    options = new MyLoggerOptions(_LoggersNames, _JsonSettings!, SettingsFromJson);
+                }
+
                 configureOptions(options);
 
-                // _Services.Configure<LoggingSettings>(configuration.GetSection(SectionPart));   
+                this.DefaultPresets = options.IsDefault();
+                if (!this.DefaultPresets) 
+                {                     
+                    _LoggersNames = options.GetLoggersNames();
+                }  
                 _Loggerconfig = options.BuildConfig();
-            }
-
-
-
-
-
-           
-
-          
+            }    
+                    
 
             return this;
         }
@@ -80,37 +117,7 @@ namespace UnitOfLogging.Core
         
 
 
-        public UnitOfLog UseDefaultPresets(Action<TargetsOptions> configureOptions = null!)
-        {
-            var Config = new TargetsPrivateConfiguration();
-
-            var TargetsOptions = new TargetsOptions();
-
-            if (configureOptions is not  null)
-            {
-                configureOptions(TargetsOptions);
-            }           
-
-            if (TargetsOptions.ConsoleLog)
-            {
-                _Loggerconfig = Config.AddDefaultColoredConsoleTarget(_Loggerconfig, ExtensionsMethods.GetKey(_LoggersNames,LoggingTarget.Console));
-            }
-
-            if (TargetsOptions.FileLog)
-            {
-                _Loggerconfig = Config.AddDefaultFileTarget(_Loggerconfig, ExtensionsMethods.GetKey(_LoggersNames,LoggingTarget.File));
-            }
-
-            if (TargetsOptions.SeqLog)
-            {
-                var seq = Config.BuildDefaultSeqTarget();
-                _Loggerconfig = Config.AddSeqTarget(_Loggerconfig, seq, ExtensionsMethods.GetKey(_LoggersNames,LoggingTarget.Seq));
-                
-            }
-
-
-            return this;
-        }
+      
 
         public UnitOfLog InitLoggers()
         {
@@ -120,7 +127,7 @@ namespace UnitOfLogging.Core
             });
             _Services.AddScoped<IMyLogger>(provider =>
             {
-                var MyLoggerManager = new LoggerManager(provider.GetService<ILoggerFactory>()!, _loggingSettings!);
+                var MyLoggerManager = new LoggerManager(provider.GetService<ILoggerFactory>()!, _JsonSettings!);
                 MyLoggerManager.AddDefaultLoggers(provider.GetService<ILoggerFactory>()!, _LoggersNames);
                 return MyLoggerManager;
             });
@@ -132,27 +139,35 @@ namespace UnitOfLogging.Core
 
       
 
-        private Dictionary<LoggingTarget, string> SetRuleTargetsName(Dictionary<LoggingTarget, string> LoggersNames)
+        private Dictionary<LoggingTarget, string> SetRuleTargetsName()
         {
+            _LoggersNames.Clear();
 
-            LoggersNames.Clear();
-
-            if (_loggingSettings?.Loggers is null)
-            {
-              //  LoggersNames.Add(LoggingTarget.Console, "ConsoleLogger");
-                return LoggersNames;
-            }
-
-            foreach (var Logger in _loggingSettings!.Loggers)
-            {
-                if (Logger.Active)
+            if (this.SettingsFromJson)
+            {    
+                if (_JsonSettings?.Loggers is null)
                 {
-                    LoggersNames.Add(Logger.Target, Logger.Name);
+                    throw new Exception("No logger config was founded in AppSettings.json");
+                }
+
+                foreach (var Logger in _JsonSettings!.Loggers)
+                {
+                    if (Logger.Active)
+                    {
+                        _LoggersNames.Add(Logger.Target, Logger.Name);
+                    }
                 }
             }
-
-            return LoggersNames;
+            return _LoggersNames;
         }
-
     }
 }
+
+
+
+
+
+
+// this.IsConfigurationComplete = true;
+
+// _Services.Configure<LoggingSettings>(configuration.GetSection(SectionPart)); 
