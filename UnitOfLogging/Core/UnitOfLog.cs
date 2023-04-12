@@ -23,7 +23,6 @@ namespace UnitOfLogging.Core
         private enum FromSettings
         {
             AppSettings,
-            Mixed,
             Code
         }
         //properties
@@ -50,9 +49,17 @@ namespace UnitOfLogging.Core
         {
             _Services = services;
             PreLoadConfiguration();
-            _JsonSettings = new LoggingSettings();
-            UseJsonSettings(ConfigSettings);
+            
         }
+
+
+
+
+
+
+
+
+
 
         private void PreLoadConfiguration()
         {
@@ -61,8 +68,11 @@ namespace UnitOfLogging.Core
             _LoggersAgents = new Dictionary<LoggingTarget, string>();
         }
 
-        private void UseJsonSettings(IConfigurationSection ConfigSettings)
-        {           
+     
+
+        public UnitOfLog UseJsonConfiguration(IConfigurationSection ConfigSettings)
+        {
+            _JsonSettings = new LoggingSettings();
             SettingsFromJson = true;
             this.SettingsFrom = FromSettings.AppSettings;
 
@@ -70,19 +80,17 @@ namespace UnitOfLogging.Core
 
             if (_JsonSettings is null)
             {
-                ArgumentNullException argumentNullException = new(nameof(UseJsonSettings), "LogSettings json section was no configured correctly");
-                throw argumentNullException;
+                
             }
             _LoggersAgents = DefineLoggerAgentsFromJsonSettings();
+            return this;
         }
-
-     
 
 
         public UnitOfLog Configure(Action<MyLoggerOptions> configureOptions)
         { 
             this.ConfigureLaunched = true;
-
+            
             if(configureOptions is null)
             {
                 ArgumentNullException argumentNullException = new(nameof(Configure), "configureOptions cannot be null");
@@ -105,6 +113,8 @@ namespace UnitOfLogging.Core
 
             configureOptions(options);
 
+           
+
             this.DefaultPresets = options.IsDefault();
 
             if (!this.DefaultPresets) 
@@ -116,6 +126,8 @@ namespace UnitOfLogging.Core
 
             return this;
         } 
+
+
         private Dictionary<LoggingTarget, string> DefineLoggerAgentsFromJsonSettings()
         {
             _LoggersAgents.Clear();
@@ -132,6 +144,9 @@ namespace UnitOfLogging.Core
             }
             return _LoggersAgents;
         }
+
+
+
 
 
         public UnitOfLog InitLoggers()

@@ -10,6 +10,7 @@ using UnitOfLogging.Models;
 using UnitOfLogging.Models.ExplicitConfiguration;
 using System.Xml.Linq;
 using UnitOfLogging.Tools;
+using UnitOfLogging.Core.TargetsManagerismo;
 
 namespace UnitOfLogging.Core.TargetConf
 {

@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Reflection;
 using UnitOfLogging.Models.ExplicitConfiguration;
 
 namespace UnitOfLogging.Tools
@@ -49,6 +51,22 @@ namespace UnitOfLogging.Tools
                 _LoggersNames.Add(target, key);
             }
             return key;
+        }
+
+        public static void ThrowIfNull(this object obj, string? message)
+        {
+            // ArgumentNullException argumentNullException = new(nameof(UseJsonConfiguration), "LogSettings json section was no configured correctly");
+            ArgumentNullException argumentNullException = new(GetLastMethodName(), message ?? "");
+            throw argumentNullException;
+        }
+
+        private static string GetLastMethodName()
+        {
+            StackTrace stackTrace = new StackTrace();
+            MethodBase methodBase = stackTrace.GetFrame(1).GetMethod();
+            return methodBase.Name;
+
+            // Console.WriteLine("El método que invocó miotrometodo es: " + methodName);
         }
     }
 

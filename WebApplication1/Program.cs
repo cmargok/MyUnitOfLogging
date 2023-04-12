@@ -10,13 +10,24 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseNLog();
 
 builder.Services
-    .UseUnitOfLogging(builder.Configuration.GetSection("LogSettings"))
+    .AddMyUnitOfLogging()
+    .UseJsonConfiguration(builder.Configuration.GetSection("LogSettings"))
     .Configure(opt => opt.UseDefaultPresets(c => c.SeqLog = false))
     .InitLoggers();
+
+builder.Services.AddMyPerrito()
+    .UseJsonConfiguration(builder.Configuration.GetSection("LogSettings"))
+    .LoggingAsync(o =>
+    {
+        o.SeqLog = false;
+    })
+    .UseDefault()
+    .Build();
+
 /*
 
 builder.Services
-    .UseUnitOfLogging()
+    .AddMyUnitOfLogging()
     .Configure(opt => opt.UseDefaultPresets())
     .InitLoggers(); 
 

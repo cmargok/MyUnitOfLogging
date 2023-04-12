@@ -71,6 +71,8 @@ namespace UnitOfLogging.Core
             return this;
         }
 
+
+        //este metodo ebe moverse
         private void SetDefaultTargetConfiguration(TargetsOptions Options)
         {
             var Config = new TargetsPrivateConfiguration();

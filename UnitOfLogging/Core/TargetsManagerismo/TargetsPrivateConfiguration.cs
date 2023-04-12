@@ -11,7 +11,7 @@ using UnitOfLogging.Models.Contracts;
 using static System.Net.WebRequestMethods;
 using System.Reflection;
 
-namespace UnitOfLogging.Core.TargetConf
+namespace UnitOfLogging.Core.TargetsManagerismo
 {
     public sealed class TargetsPrivateConfiguration
     {
@@ -20,7 +20,7 @@ namespace UnitOfLogging.Core.TargetConf
         public ISeqConfig? SeqConfig { get; set; }
 
         private string logDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
-       
+
         public TargetsPrivateConfiguration()
         {
         }
@@ -59,10 +59,10 @@ namespace UnitOfLogging.Core.TargetConf
         public LoggingConfiguration AddDefaultFileTarget(LoggingConfiguration loggerconfig, string LoggerName)
         {
             if (loggerconfig is null) throw new ArgumentNullException(nameof(AddDefaultFileTarget));
-            
-            FileConfig = null;           
+
+            FileConfig = null;
             FileConfig = new FileConfiguration();
-            FileConfig.FileTargetConfig = new FileTarget();     
+            FileConfig.FileTargetConfig = new FileTarget();
             FileConfig.FileTargetConfig.FileName = SetDirectoryPathEnding("Log\\Log_${shortdate}.txt");
             FileConfig.FileTargetConfig.Layout = "${longdate} ${uppercase:${level}} ${logger} => ${message}";
             FileConfig.FileTargetConfig.Name = "Flowlogfile";
@@ -77,7 +77,7 @@ namespace UnitOfLogging.Core.TargetConf
             if (loggerconfig is null) throw new ArgumentNullException(nameof(AddDefaultErrorFileTarget));
 
             FileConfig = null;
-            FileConfig = new FileConfiguration();          
+            FileConfig = new FileConfiguration();
             FileConfig.FileTargetConfig = new FileTarget();
             FileConfig.FileTargetConfig.FileName = SetDirectoryPathEnding("Log\\Error_Log_${shortdate}.txt");
             FileConfig.FileTargetConfig.Layout = "${longdate} ${uppercase:${level}} ${logger} ${message} ${newline}${exception:format=ToString} ${newline} ${stacktrace} "
@@ -115,7 +115,7 @@ namespace UnitOfLogging.Core.TargetConf
                 ServerUrl = "http://localhost:5341",
                 ApiKey = "",
             };
-          
+
             seqTarget.Properties.Add(new SeqPropertyItem
             {
                 Name = "Application",
@@ -130,7 +130,7 @@ namespace UnitOfLogging.Core.TargetConf
                 Value = "Development",
             });
             BufferingTargetWrapper bufferingTarget = new();
-            
+
             bufferingTarget!.BufferSize = 1024;
             bufferingTarget!.FlushTimeout = 2000;
             bufferingTarget!.SlidingTimeout = false;
@@ -201,18 +201,32 @@ namespace UnitOfLogging.Core.TargetConf
 
 
 
-        private LoggingConfiguration AddRule(LoggingConfiguration loggerconfig, string TargetName, LogLevel level, Target target, string LoggerName)
+     
+
+
+
+
+    }
+
+
+    public static class TargetingConfig
+    {
+        public static LoggingConfiguration AddRule(this LoggingConfiguration loggerconfig, string TargetName, LogLevel level, Target target, string LoggerName)
         {
             loggerconfig.AddTarget(TargetName, target);
             loggerconfig.LoggingRules.Add(new LoggingRule(LoggerName, level, target));
             return loggerconfig;
         }
 
+        public static LoggingConfiguration AddRuleAsync(this LoggingConfiguration loggerconfig, string TargetName, LogLevel level, Target target, string LoggerName)
+        {
+            var asyncFileTarget = new AsyncTargetWrapper(target);
+            loggerconfig.AddTarget(TargetName, asyncFileTarget);
+            loggerconfig.LoggingRules.Add(new LoggingRule(LoggerName, level, asyncFileTarget));
+            return loggerconfig;
+        }
 
     }
-
-
-
 
 
 
