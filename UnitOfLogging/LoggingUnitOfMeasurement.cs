@@ -61,7 +61,6 @@ namespace UnitOfLogging
 
         public static UnitOfLogFactory CreateFactory(IServiceCollection services)
         {
-
             return new UnitOfLogFactory(services);
         }
 
@@ -71,9 +70,7 @@ namespace UnitOfLogging
             _JsonConfiguration = ConfigSettings.BindSettings();
             SetAgentsToMymOFromJson(_JsonConfiguration);
             return this;
-        }
-
-      
+        }      
 
         public UnitOfLogFactory LoggingAsync(Action<TargetsOptionsAsync> configureOptions = null!)
         {
@@ -98,9 +95,6 @@ namespace UnitOfLogging
             AsyncOptions = Options;
             return this;
         }
-
-
-
 
         public UnitOfLogFactory UseDefault(Action<TargetsOptions> configureOptions = null!)
         {
@@ -252,6 +246,7 @@ namespace UnitOfLogging
         public TargetsActualConfigu targetsActualConfigu;
         public MymO()
         {
+            _NlogCustomConfiguration = new LoggingConfiguration();
             _LoggersAgents = new();
             targetsActualConfigu = new TargetsActualConfigu();
         }
