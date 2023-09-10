@@ -29,6 +29,9 @@ namespace UnitOfLogging.Core.TargetsManagerismo
             return Path.Combine(logDirectory, logFileName);
         }
 
+
+
+
         public LoggingConfiguration AddDefaultColoredConsoleTarget(LoggingConfiguration loggerconfig, string LoggerName)
         {
             if (loggerconfig is null) throw new ArgumentNullException(nameof(AddDefaultColoredConsoleTarget));
@@ -36,7 +39,7 @@ namespace UnitOfLogging.Core.TargetsManagerismo
             ConsoleConfiguration.ConsoleTargetConfig = new ColoredConsoleTarget();
             ConsoleConfiguration.ConsoleTargetConfig.Name = ConsoleConfiguration.TargetName;
             ConsoleConfiguration.ConsoleTargetConfig.Layout = @"${longdate} ${uppercase:${level}} ${logger} ${message}";
-            AddRule(loggerconfig, ConsoleConfiguration.TargetName, ConsoleConfiguration.TargetLogLevel, ConsoleConfiguration.ConsoleTargetConfig, LoggerName);
+            TargetingConfig.AddRule(loggerconfig, ConsoleConfiguration.TargetName, ConsoleConfiguration.TargetLogLevel, ConsoleConfiguration.ConsoleTargetConfig, LoggerName);
 
             return loggerconfig;
 
@@ -50,7 +53,7 @@ namespace UnitOfLogging.Core.TargetsManagerismo
             {
                 return AddDefaultColoredConsoleTarget(loggerconfig, LoggerName); ;
             }
-            AddRule(loggerconfig, ConsoleConfiguration!.TargetName, ConsoleConfiguration.TargetLogLevel, consoleTarget, LoggerName);
+            TargetingConfig.AddRule(loggerconfig, ConsoleConfiguration!.TargetName, ConsoleConfiguration.TargetLogLevel, consoleTarget, LoggerName);
 
             return loggerconfig;
         }
@@ -66,7 +69,7 @@ namespace UnitOfLogging.Core.TargetsManagerismo
             FileConfig.FileTargetConfig.FileName = SetDirectoryPathEnding("Log\\Log_${shortdate}.txt");
             FileConfig.FileTargetConfig.Layout = "${longdate} ${uppercase:${level}} ${logger} => ${message}";
             FileConfig.FileTargetConfig.Name = "Flowlogfile";
-            AddRule(loggerconfig, FileConfig!.TargetName, FileConfig.TargetLogLevel, FileConfig.FileTargetConfig, LoggerName);
+            TargetingConfig.AddRule(loggerconfig, FileConfig!.TargetName, FileConfig.TargetLogLevel, FileConfig.FileTargetConfig, LoggerName);
 
             return loggerconfig;
 
@@ -85,7 +88,7 @@ namespace UnitOfLogging.Core.TargetsManagerismo
             FileConfig.FileTargetConfig.Name = "Errorlogfile";
             FileConfig.TargetName = "Errorlogfile";
             FileConfig.TargetLogLevel = LogLevel.Error;
-            AddRule(loggerconfig, FileConfig!.TargetName, FileConfig.TargetLogLevel, FileConfig.FileTargetConfig!, LoggerName);
+            TargetingConfig.AddRule(loggerconfig, FileConfig!.TargetName, FileConfig.TargetLogLevel, FileConfig.FileTargetConfig!, LoggerName);
 
             return loggerconfig;
         }
@@ -102,7 +105,7 @@ namespace UnitOfLogging.Core.TargetsManagerismo
                 return AddDefaultErrorFileTarget(logConfig, LoggerName);
             }
             if (string.IsNullOrEmpty(fileTarget.FileName.ToString())) fileTarget.FileName = SetDirectoryPathEnding("${var:logDirectory}/Log_${shortdate}.txt");
-            AddRule(loggerconfig, FileConfig!.TargetName, FileConfig.TargetLogLevel, fileTarget, LoggerName);
+            TargetingConfig.AddRule(loggerconfig, FileConfig!.TargetName, FileConfig.TargetLogLevel, fileTarget, LoggerName);
 
             return loggerconfig;
         }
@@ -194,7 +197,7 @@ namespace UnitOfLogging.Core.TargetsManagerismo
         {
 
             if (buffering is null || loggerconfig is null) throw new ArgumentNullException(nameof(AddSeqTarget));
-            AddRule(loggerconfig, SeqConfig!.TargetName, SeqConfig.TargetLogLevel, buffering, LoggerName);
+            TargetingConfig.AddRule(loggerconfig, SeqConfig!.TargetName, SeqConfig.TargetLogLevel, buffering, LoggerName);
             return loggerconfig;
 
         }

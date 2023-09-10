@@ -2,6 +2,7 @@
 using NLog.Config;
 using System.Collections.Generic;
 using UnitOfLogging.Core.TargetConf;
+using UnitOfLogging.Core.TargetsManagerismo;
 using UnitOfLogging.Models.ExplicitConfiguration;
 using UnitOfLogging.Tools;
 

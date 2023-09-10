@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using MyLoggingUnit;
 using NLog.Web;
 using UnitOfLogging;
 using UnitOfLogging.Logging;
@@ -24,6 +25,15 @@ builder.Services.AddMyPerrito()
     .UseDefault()
     .Build();
 
+
+builder.AddUnitOfLoggingV2()
+    .UseJsonConfiguration("LogSettings")
+    .Configure( opt =>
+    {
+        opt.UseDefaultPresets();       
+        
+    })
+    .Build();
 /*
 
 builder.Services

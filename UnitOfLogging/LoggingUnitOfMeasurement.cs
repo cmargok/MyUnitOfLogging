@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -52,7 +53,7 @@ namespace UnitOfLogging
         private bool ReadyToBuild = false;
         private MymO mim;
 
-        private UnitOfLogFactory(IServiceCollection services){ 
+        private UnitOfLogFactory(IServiceCollection services) {
             _Services = services;
             mim = new MymO();
             AsyncOptions = new TargetsOptionsAsync();
@@ -64,22 +65,28 @@ namespace UnitOfLogging
             return new UnitOfLogFactory(services);
         }
 
+
+
+
+
+
+
         public UnitOfLogFactory UseJsonConfiguration(IConfigurationSection ConfigSettings)
         {
             mim.SettingsFromJson = true;
             _JsonConfiguration = ConfigSettings.BindSettings();
             SetAgentsToMymOFromJson(_JsonConfiguration);
             return this;
-        }      
+        }
 
         public UnitOfLogFactory LoggingAsync(Action<TargetsOptionsAsync> configureOptions = null!)
         {
             var Options = new TargetsOptionsAsync();
 
-            if (configureOptions is not null) configureOptions(Options);                    
+            if (configureOptions is not null) configureOptions(Options);
 
             if (mim.SettingsFromJson)
-            {               
+            {
                 Options.FileLog = _JsonConfiguration!.Loggers[0].File.Async;
                 Options.SeqLog = _JsonConfiguration!.Loggers[0].Seq.Async;
             }
@@ -123,13 +130,13 @@ namespace UnitOfLogging
 
         public MymO Build()
         {
-            if(!ReadyToBuild) throw new Exception( "Custom or default configuration was no implemented");
+            if (!ReadyToBuild) throw new Exception("Custom or default configuration was no implemented");
 
             _Services.AddLogging(logging =>
             {
                 logging.ClearProviders();
                 logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
-            });            
+            });
             BuildTargetOptions();
 
             if (mim.BuildLoggersConfiguration())
@@ -144,10 +151,10 @@ namespace UnitOfLogging
             }
 
             throw new NotImplementedException();
-           
-            
-           
-           
+
+
+
+
         }
 
 
@@ -202,6 +209,8 @@ namespace UnitOfLogging
 
             mim.targetsActualConfigu = Options;
         }
+
+
         private List<IMyLogger> AddMyLoggers(ILoggerFactory loggerFactory)
         {
             if (loggerFactory == null) throw new ArgumentNullException(nameof(loggerFactory));
@@ -242,7 +251,9 @@ namespace UnitOfLogging
         //aqui creamo sun objeto que hara toda la configuracion por default y mas adelanta la configuracion personalizada
 
         private LoggingConfiguration _NlogCustomConfiguration;
+
         private Dictionary<LoggingTarget, string> _LoggersAgents;
+
         public TargetsActualConfigu targetsActualConfigu;
         public MymO()
         {
@@ -251,7 +262,7 @@ namespace UnitOfLogging
             targetsActualConfigu = new TargetsActualConfigu();
         }
 
-        public void SetAgents(Dictionary<LoggingTarget, string> Agents) =>  _LoggersAgents = Agents;
+        public void SetAgents(Dictionary<LoggingTarget, string> Agents) => _LoggersAgents = Agents;
         public Dictionary<LoggingTarget, string> GetAgentsDictionary() => _LoggersAgents;
 
 
@@ -276,19 +287,23 @@ namespace UnitOfLogging
 
     public static class JsonConfiguration
     {
+        private static string ErrorMessage = "LogSettings json section was no configured correctly";
+
         public static LoggingSettings BindSettings(this IConfigurationSection ConfigSettings)
         {
             LoggingSettings Settings = new();
 
             ConfigSettings.Bind(Settings);
-            var erroMessage = "LogSettings json section was no configured correctly";
-            Settings.ThrowIfNull(erroMessage);
 
-            if (!(Settings.Loggers.Count > 0)) throw new Exception(erroMessage);
+            Settings.ThrowIfNull(ErrorMessage);
+
+            if (!(Settings.Loggers.Count > 0)) throw new Exception(ErrorMessage);
 
             return Settings;
         }
     }
+
+
 }
 
 
