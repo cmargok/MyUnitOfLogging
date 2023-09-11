@@ -25,9 +25,11 @@ builder.AddUnitOfLogging()
         
     })
     .Build();
-
+```
 
 Para utilizar este paquete, debe agregar la configuración correspondiente en su archivo `appsettings.json` o `web.config`, como se muestra a continuación:
+
+
 ```json
  "LogSettings": {
     "LoggingActive": true,
