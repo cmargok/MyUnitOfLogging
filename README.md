@@ -2,31 +2,30 @@
 
 ## Descripción
 
-El paquete NuGet proporciona un sistema de logging preconfigurado con NLog que permite la salida a la consola, un archivo y Seq y posteriormente a otros blancos de logueo
+Api que se implementada para recibir logs por medios de masstransint y rabitmq, al momento se encuentra en fase de pruebas, solo admite configuraciones predeterminadas, pronto se agregara mas lectura de campos y definicion de targets escogidos.
 
 ## Instalación
 
-Puede instalar este paquete NuGet mediante la consola del Administrador de paquetes de Visual Studio o mediante la línea de comandos de NuGet.
+descargue el repositorio, compile y ejecute
 
-### Consola del Administrador de paquetes
+#
 
-1. Abra la solución en Visual Studio.
-2. Seleccione el proyecto donde desea instalar el paquete.
-3. Haga clic derecho sobre el proyecto y seleccione "Administrador de paquetes NuGet".
-4. En la pestaña "Examinar", busque "MyUnitOfLogging".
-5. Seleccione el paquete en la lista y haga clic en "Instalar".
 
-### Línea de comandos de NuGet
-
-1. Abra la consola del sistema.
-2. Navegue hasta la carpeta del proyecto donde desea instalar el paquete.
-3. Ejecute el siguiente comando:
-
-```powershell
-Install-Package MyUnitOfLogging
-```
 
 ### Configuración
+
+Configuracion en program. cs
+
+```csharp
+builder.AddUnitOfLogging()
+    .UseJsonConfiguration("LogSettings")
+    .Configure( opt =>
+    {
+        opt.UseDefaultPresets();       
+        
+    })
+    .Build();
+
 
 Para utilizar este paquete, debe agregar la configuración correspondiente en su archivo `appsettings.json` o `web.config`, como se muestra a continuación:
 ```json
@@ -34,23 +33,29 @@ Para utilizar este paquete, debe agregar la configuración correspondiente en su
     "LoggingActive": true,
     "Loggers": [
       {
-        "Active": true,
-        "Name": "ConsoleLogger"
-      },
-      {
-        "Active": true,
-        "Name": "FileLogger"
-      },
-      {
-        "Active": true,
-        "Name": "SeqLogger"
+        "Console": {
+          "Active": true,
+          "Name": "ConsoleLogger"
+        },
+        "File": {
+          "Active": false,
+          "Name": "FileLogger"
+        },
+        "ErrorFile": {
+          "Active": true,
+          "Name": "ErrorFileLogger"
+        },
+        "Seq": {
+          "Active": false,
+          "Name": "SeqLogger"
+        }
       }
     ]
   }
   ```
   
 ### Contribuir
-Si encuentra algún error o desea mejorar este paquete, no dude en enviar una solicitud de extracción o crear un problema.
+Si encuentra algún error o desea mejorar este repositio, no dude en enviar una solicitud de extracción o crear un problema.
 
 ### Licencia
 Este paquete está bajo la Licencia MIT.
