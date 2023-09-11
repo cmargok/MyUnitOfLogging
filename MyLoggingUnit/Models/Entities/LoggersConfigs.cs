@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using MyLoggingUnit.Tools.Enums;
 
-namespace MyLoggingUnit
+namespace MyLoggingUnit.Models.Entities
 {
     public class LoggersConfigs
     {

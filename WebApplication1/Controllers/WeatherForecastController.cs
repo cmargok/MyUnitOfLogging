@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using UnitOfLogging.Logging;
+using MyLoggingUnit.Logger;
 
 namespace WebApplication1.Controllers { 
 
@@ -25,8 +25,20 @@ namespace WebApplication1.Controllers {
         [HttpGet(Name = "GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
-            _log.LoggingInformation("nose que hago aqui");
+            _log.LoggingInformation("Logueando Informacion");
+            _log.LoggingWarning("Logueando Un Warning");
 
+            try
+            {
+                throw new Exception("siks miks");
+
+            }
+            catch (Exception e)
+            {
+                _log.LoggingError(e,"Soy UN errorrsote");
+               
+            }
+            
 
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {

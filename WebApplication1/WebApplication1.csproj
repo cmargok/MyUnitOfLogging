@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MyLoggingUnit\MyLoggingUnit.csproj" />
-    <ProjectReference Include="..\UnitOfLogging\UnitOfLogging.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace MyLoggingUnit
+namespace MyLoggingUnit.Tools.Enums
 {
     public enum LoggingTarget
     {
@@ -13,13 +13,16 @@ namespace MyLoggingUnit
         [field: Description("File")]
         File = 2,
 
+        [field: Description("ErrorFile")]
+        ErrorFile = 3,
+
         [field: Description("Seq")]
-        Seq = 3,
+        Seq = 4,
 
         [field: Description("ElasticSearch")]
-        ElasticSearch = 4,
+        ElasticSearch = 5,
 
         [field: Description("Database")]
-        Database = 5,
+        Database = 6,
     }
 }

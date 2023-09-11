@@ -1,4 +1,4 @@
-﻿namespace MyLoggingUnit
+﻿namespace MyLoggingUnit.Models
 {
     public class TargetConfiguration
     {

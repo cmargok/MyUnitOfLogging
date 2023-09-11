@@ -1,26 +1,34 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace MyLoggingUnit
+namespace MyLoggingUnit.Logger
 {
     public sealed class LoggerManager : IMyLogger
     {
-
-        private List<IMyLogger> _apiLoggers;
-        //  private readonly LoggingSettings _loggingSettings;
-        //private readonly Dictionary<LoggingTarget, string> _loggers;
         private bool IsLoggingActive = false;
+        private List<IMyLogger> _apiLoggers;
 
-        public LoggerManager(ILoggerFactory loggerFactory)
-        {
-            _apiLoggers = new List<IMyLogger>();
-            // _loggingSettings = settings;
-            //_loggers = new();
-            // InitializeLoggers(loggerFactory);
-        }
+        public void Activate() => IsLoggingActive = true;
+
         public LoggerManager()
         {
             _apiLoggers = new List<IMyLogger>();
         }
+
+
+
+
+        //  private readonly LoggingSettings _loggingSettings;
+        //private readonly Dictionary<LoggingTarget, string> _loggers;
+
+
+        //public LoggerManager(ILoggerFactory loggerFactory)
+        //{
+        //    _apiLoggers = new List<IMyLogger>();
+        //    // _loggingSettings = settings;
+        //    //_loggers = new();
+        //    // InitializeLoggers(loggerFactory);
+        //}
+
         /*private void InitializeLoggers(ILoggerFactory loggerFactory)
         {
             if (_loggingSettings.LoggingActive)
@@ -36,7 +44,7 @@ namespace MyLoggingUnit
 
         public void SetLoggers(List<IMyLogger> value) => _apiLoggers = value;
 
-        public void Activate() => IsLoggingActive = true;
+
 
 
 
@@ -44,10 +52,6 @@ namespace MyLoggingUnit
         {
             if (IsLoggingActive)
             {
-                //foreach(var logger in _apiLoggers)
-                //{
-                //    logger.LoggingInformation(message);
-                //}
                 _apiLoggers.ForEach(logger => logger.LoggingInformation(message));
             }
         }

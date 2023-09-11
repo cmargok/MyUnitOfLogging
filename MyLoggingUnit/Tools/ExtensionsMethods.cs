@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
+using MyLoggingUnit.Tools.Enums;
 
 namespace MyLoggingUnit.Tools
 {
@@ -55,8 +56,13 @@ namespace MyLoggingUnit.Tools
         public static void ThrowIfNull(this object obj, string? message)
         {
             // ArgumentNullException argumentNullException = new(nameof(UseJsonConfiguration), "LogSettings json section was no configured correctly");
-            ArgumentNullException argumentNullException = new(GetLastMethodName(), message ?? "");
-            throw argumentNullException;
+            if(obj == null)
+            {
+                ArgumentNullException argumentNullException = new(GetLastMethodName(), message ?? "");
+                throw argumentNullException;
+            }
+
+            
         }
 
         private static string GetLastMethodName()

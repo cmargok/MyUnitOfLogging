@@ -1,32 +1,30 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using MyLoggingUnit;
+using MyLoggingUnit.Principal;
 using NLog.Web;
-using UnitOfLogging;
-using UnitOfLogging.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Host.UseNLog();
 
-builder.Services
-    .AddMyUnitOfLogging()
-    .UseJsonConfiguration(builder.Configuration.GetSection("LogSettings"))
-    .Configure(opt => opt.UseDefaultPresets(c => c.SeqLog = false))
-    .InitLoggers();
+//builder.Services
+//    .AddMyUnitOfLogging()
+//    .UseJsonConfiguration(builder.Configuration.GetSection("LogSettings"))
+//    .Configure(opt => opt.UseDefaultPresets(c => c.SeqLog = false))
+//    .InitLoggers();
 
-builder.Services.AddMyPerrito()
-    .UseJsonConfiguration(builder.Configuration.GetSection("LogSettings"))
-    .LoggingAsync(o =>
-    {
-        o.SeqLog = false;
-    })
-    .UseDefault()
-    .Build();
+//builder.Services.AddMyPerrito()
+//    .UseJsonConfiguration(builder.Configuration.GetSection("LogSettings"))
+//    .LoggingAsync(o =>
+//    {
+//        o.SeqLog = false;
+//    })
+//    .UseDefault()
+//    .Build();
 
 
-builder.AddUnitOfLoggingV2()
+builder.AddUnitOfLogging()
     .UseJsonConfiguration("LogSettings")
     .Configure( opt =>
     {
@@ -50,7 +48,7 @@ builder.Services
 //        {
 //            tg.AddConsoleLogging(col =>
 //            {
-//                col.DefaultConsoleLogSettings = true;
+//                col.DefaultConsoleLogSettings = true; 
 //                col.IsActive = true;
 //            });
 //           // tg.AddDefaultFileLogging();

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace MyLoggingUnit
+namespace MyLoggingUnit.Logger
 {
     internal class MyLogger : IMyLogger
     {

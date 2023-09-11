@@ -2,12 +2,16 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MyLoggingUnit.BuilderAndSettings;
+using MyLoggingUnit.Core.Json;
+using MyLoggingUnit.Core.Options;
+using MyLoggingUnit.Logger;
 using NLog;
 using NLog.Config;
 using NLog.Extensions.Logging;
 using NLog.Targets;
 
-namespace MyLoggingUnit
+namespace MyLoggingUnit.Principal
 {
 
     public class MyUnitOfLog
@@ -15,14 +19,12 @@ namespace MyLoggingUnit
         private readonly IServiceCollection _Services;
         private readonly IConfiguration _Configuration;
         private LoggingSettings _JsonSettings;
-        private LoggingConfiguration NlogNewConfiguration;
         private LogBuilder _LogBuilder;
         private MyUnitOfLog(IServiceCollection services, IConfiguration configuration)
         {
             _Services = services;
             _LogBuilder = new LogBuilder();
             _Configuration = configuration;
-            NlogNewConfiguration = new LoggingConfiguration();
         }
 
 
@@ -50,16 +52,16 @@ namespace MyLoggingUnit
                 throw argumentNullException;
             }
 
-         
+
 
 
             var ConfigureOptions = new LoggerOptions();
 
-           /* if (this.SettingsFromJson)
-            {
-                options = new LoggerOptions(_LoggersAgents, _JsonSettings!, SettingsFromJson);
-            }
-            */
+            /* if (this.SettingsFromJson)
+             {
+                 options = new LoggerOptions(_LoggersAgents, _JsonSettings!, SettingsFromJson);
+             }
+             */
             loggerOptions(ConfigureOptions);
 
 
@@ -96,30 +98,39 @@ namespace MyLoggingUnit
         //se llama casi al final para constuir los loggers ocnes ta ocnfiguracion
         public MyUnitOfLog Build()
         {
-            
+            if (!_LogBuilder.Status()) return this;
+
             _Services.AddLogging(logging =>
             {
                 logging.ClearProviders();
                 logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
             });
 
-            if (_LogBuilder.Json()) 
+
+            if (_LogBuilder.Json())
             {
-                if (_LogBuilder.Status())
-                    _LogBuilder.SetLoggersFromJson(_JsonSettings.LoggingActive, _JsonSettings.Loggers.FirstOrDefault()!);
-                else 
-                    return this;
+                _LogBuilder.SetLoggersFromJson(_JsonSettings.LoggingActive, _JsonSettings.Loggers.FirstOrDefault()!);
+
             }
-            LoggingConfiguration nuevo =new LoggingConfiguration();
 
 
-            LoggerOptionsManager loggerOptionsManager = new LoggerOptionsManager();
+            LoggingConfiguration loggingConfiguration = new();
 
-            loggerOptionsManager.SetDefaultLoggersConfiguration(_LogBuilder.GetLoggers(),  nuevo);
+            //Configurador de los loggers y sus opciones
+            LoggerOptionsManager loggerOptionsManager = new();
 
-            _LogBuilder.SetloggingConfiguration(nuevo);
+            if (_LogBuilder.IsDefault)
+            { //esogemos Opcion por defecto
+                loggerOptionsManager.SetDefaultLoggersConfiguration(_LogBuilder.GetLoggers(), loggingConfiguration);
+            }
 
-            return this;    
+
+
+            //seteamos la configuracion hacia NLOG
+            LogManager.Configuration = loggingConfiguration;
+
+            BuildLoggerImplementation();
+            return this;
         }
 
 
@@ -150,22 +161,22 @@ namespace MyLoggingUnit
 
 
 
-        public void BuildAA()
+
+        public void BuildLoggerImplementation()
         {
 
 
-          //  BuildTargetOptions();
-
-            LogManager.Configuration = _LogBuilder.GetLoggingConfiguration();
+            //  BuildTargetOptions();
 
 
 
-            RegisterLoggins();
+
+            RegisterLoggers();
 
             _Services.AddLogging(logging => logging.AddNLog());
 
 
-            return this;
+
         }
 
 
@@ -187,7 +198,7 @@ namespace MyLoggingUnit
         //    _LogBuilder.targetsActualConfigu = Options;
         //}
 
-        private void RegisterLoggins()
+        private void RegisterLoggers()
         {
             _Services.AddScoped<IMyLogger, LoggerManager>(provider =>
             {
@@ -208,14 +219,14 @@ namespace MyLoggingUnit
         {
             if (loggerFactory == null) throw new ArgumentNullException(nameof(loggerFactory));
 
-            List<IMyLogger> mylist = new();
+            List<IMyLogger> myList = new();
 
-            foreach (var logger in mim.GetAgentsDictionary())
+            foreach (var logger in _LogBuilder.GetActiveLoggers())
             {
-                mylist.Add(new MyLogger(loggerFactory, logger.Value));
+                myList.Add(new MyLogger(loggerFactory, logger.Name));
             }
 
-            return mylist;
+            return myList;
         }
 
     }

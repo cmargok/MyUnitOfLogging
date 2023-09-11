@@ -1,4 +1,4 @@
-﻿namespace MyLoggingUnit
+﻿namespace MyLoggingUnit.Logger
 {
     public interface IMyLogger
     {
