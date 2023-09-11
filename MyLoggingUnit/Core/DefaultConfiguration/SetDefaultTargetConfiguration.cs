@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using MyLoggingUnit.Models.Targets;
 using MyLoggingUnit.Models.TargetsContracts;
+using Nlog.RabbitMQ.Target;
 using NLog;
 using NLog.Config;
 using NLog.Targets;
@@ -21,6 +22,9 @@ namespace MyLoggingUnit.Core.DefaultConfiguration
         public IFileConfig? FileConfig { get; set; }
         public ISeqConfig? SeqConfig { get; set; }
 
+        public IRabbitMQTargetConfig? RabbitMQConfig { get; set; }
+
+
         private string logDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!;
 
         public SetDefaultTargetConfiguration()
@@ -31,8 +35,24 @@ namespace MyLoggingUnit.Core.DefaultConfiguration
             return Path.Combine(logDirectory, logFileName);
         }
 
+        public LoggingConfiguration AddDefaultRabbitMQ(LoggingConfiguration loggerConfig, string LoggerName)
+        {
+            if (loggerConfig is null) throw new ArgumentNullException(nameof(AddDefaultRabbitMQ));
 
+            RabbitMQConfig = new RabbitMQTargetConfig();
 
+            RabbitMQConfig.RabbitMQTarget = new RabbitMQTarget();
+            RabbitMQConfig.RabbitMQTarget.Name = RabbitMQConfig.TargetName;
+            RabbitMQConfig.RabbitMQTarget.AppId = RabbitMQConfig.AppName;
+            RabbitMQConfig.RabbitMQTarget.UseJSON = true;
+            RabbitMQConfig.RabbitMQTarget.Layout = "${longdate} ${uppercase:${level}} ${logger} ${message} ${newline}${exception:format=ToString} ${newline} ${stacktrace} "
+                + "${newline}  ${aspnet-request-routeparameters}  ${newline}	${aspnet-request-url} ${newline} ${aspnet-response-statuscode}";
+
+            loggerConfig.AddRule(RabbitMQConfig.TargetName, RabbitMQConfig.TargetLogLevel, RabbitMQConfig.RabbitMQTarget, LoggerName);
+
+            return loggerConfig;
+
+        }
 
         public LoggingConfiguration AddDefaultColoredConsoleTarget(LoggingConfiguration loggerConfig, string LoggerName)
         {

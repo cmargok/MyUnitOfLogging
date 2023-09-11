@@ -13,6 +13,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
     <PackageReference Include="NLog" Version="5.2.4" />
+    <PackageReference Include="NLog.Database" Version="5.2.4" />
+    <PackageReference Include="Nlog.RabbitMQ.Target" Version="2.11.18" />
     <PackageReference Include="NLog.Schema" Version="5.2.4" />
     <PackageReference Include="NLog.Targets.Seq" Version="3.0.0" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.4" />

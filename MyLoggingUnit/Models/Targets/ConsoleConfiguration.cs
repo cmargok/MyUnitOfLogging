@@ -11,5 +11,4 @@ namespace MyLoggingUnit.Models.Targets
         public string TargetName { get; set; } = "console";
         public bool DefaultConsoleLogSettings { get; set; } = true;
     }
-
 }

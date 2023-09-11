@@ -5,5 +5,4 @@ namespace MyLoggingUnit.Models.TargetsContracts
     {
         public ColoredConsoleTarget? ConsoleTargetConfig { get; set; }
     }
-
 }

@@ -1,4 +1,5 @@
-﻿using LogLevel = NLog.LogLevel;
+﻿using NLog.Layouts;
+using LogLevel = NLog.LogLevel;
 namespace MyLoggingUnit.Models
 {
     public interface ITargetConfiguration
@@ -7,5 +8,7 @@ namespace MyLoggingUnit.Models
         public LogLevel TargetLogLevel { get; set; }
         public string TargetName { get; set; }
     }
+
+
 
 }
