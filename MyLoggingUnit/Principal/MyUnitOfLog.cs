@@ -110,7 +110,6 @@ namespace MyLoggingUnit.Principal
             if (_LogBuilder.Json())
             {
                 _LogBuilder.SetLoggersFromJson(_JsonSettings.LoggingActive, _JsonSettings.Loggers.FirstOrDefault()!);
-
             }
 
 

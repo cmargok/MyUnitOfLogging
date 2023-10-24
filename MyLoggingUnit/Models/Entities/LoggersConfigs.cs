@@ -15,6 +15,6 @@ namespace MyLoggingUnit.Models.Entities
 
         public LoggingTarget Target { get; set; } = LoggingTarget.None;
 
-        //public bool Async { get; set; } = false;
+        public bool Async { get; set; } = false;
     }
 }

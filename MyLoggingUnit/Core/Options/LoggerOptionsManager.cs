@@ -49,6 +49,12 @@ namespace MyLoggingUnit.Core.Options
                 //  this.Targets.SeqLog = true;
                 Config.AddSeqTarget(loggerConfig, Config.BuildDefaultSeqTarget(), loggersSet.Seq.Name);
             }
+
+            if (loggersSet.RabbitMQ.Active)
+            {
+                //  this.Targets.SeqLog = true;
+                Config.AddDefaultRabbitMQ(loggerConfig, loggersSet.RabbitMQ.Name);
+            }
         }
 
     }

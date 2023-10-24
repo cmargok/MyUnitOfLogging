@@ -24,5 +24,8 @@ namespace MyLoggingUnit.Tools.Enums
 
         [field: Description("Database")]
         Database = 6,
+
+        [field: Description("RabbitMQ")]
+        RabbitMQ = 7,
     }
 }

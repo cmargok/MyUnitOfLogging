@@ -65,6 +65,11 @@ namespace MyLoggingUnit.BuilderAndSettings
                     MyLoggers.Seq = loggersSet.Seq;
                     MyLoggers.Seq.Name = !string.IsNullOrEmpty(loggersSet.Seq.Name) ? loggersSet.Seq.Name : $"SeqLogger_default";
                 }
+                if(loggersSet.RabbitMQ.Active == true)
+                {
+                    MyLoggers.RabbitMQ = loggersSet.RabbitMQ;
+                    MyLoggers.RabbitMQ.Name = !string.IsNullOrEmpty(loggersSet.Seq.Name) ? loggersSet.Seq.Name : $"RabbitMQLogger_default";
+                }
             }
 
         }

@@ -35,7 +35,7 @@ namespace MyLoggingUnit.Core.DefaultConfiguration
             return Path.Combine(logDirectory, logFileName);
         }
 
-        public LoggingConfiguration AddDefaultRabbitMQ(LoggingConfiguration loggerConfig, string LoggerName)
+        public LoggingConfiguration AddDefaultRabbitMQ(LoggingConfiguration loggerConfig, string LoggerName, bool IsAsync = false)
         {
             if (loggerConfig is null) throw new ArgumentNullException(nameof(AddDefaultRabbitMQ));
 
@@ -48,13 +48,14 @@ namespace MyLoggingUnit.Core.DefaultConfiguration
             RabbitMQConfig.RabbitMQTarget.Layout = "${longdate} ${uppercase:${level}} ${logger} ${message} ${newline}${exception:format=ToString} ${newline} ${stacktrace} "
                 + "${newline}  ${aspnet-request-routeparameters}  ${newline}	${aspnet-request-url} ${newline} ${aspnet-response-statuscode}";
 
-            loggerConfig.AddRule(RabbitMQConfig.TargetName, RabbitMQConfig.TargetLogLevel, RabbitMQConfig.RabbitMQTarget, LoggerName);
+
+            loggerConfig.AddRule(RabbitMQConfig.TargetName, RabbitMQConfig.TargetLogLevel, RabbitMQConfig.RabbitMQTarget, LoggerName, IsAsync);
 
             return loggerConfig;
 
         }
 
-        public LoggingConfiguration AddDefaultColoredConsoleTarget(LoggingConfiguration loggerConfig, string LoggerName)
+        public LoggingConfiguration AddDefaultColoredConsoleTarget(LoggingConfiguration loggerConfig, string LoggerName, bool IsAsync = false)
         {
             if (loggerConfig is null) throw new ArgumentNullException(nameof(AddDefaultColoredConsoleTarget));
 
@@ -62,12 +63,12 @@ namespace MyLoggingUnit.Core.DefaultConfiguration
             ConsoleConfiguration.ConsoleTargetConfig = new ColoredConsoleTarget();
             ConsoleConfiguration.ConsoleTargetConfig.Name = ConsoleConfiguration.TargetName;
             ConsoleConfiguration.ConsoleTargetConfig.Layout = @"${longdate} ${uppercase:${level}} ${logger} ${message}";
-            loggerConfig.AddRule(ConsoleConfiguration.TargetName, ConsoleConfiguration.TargetLogLevel, ConsoleConfiguration.ConsoleTargetConfig, LoggerName);
+            loggerConfig.AddRule(ConsoleConfiguration.TargetName, ConsoleConfiguration.TargetLogLevel, ConsoleConfiguration.ConsoleTargetConfig, LoggerName, IsAsync);
 
             return loggerConfig;
 
         }
-        public LoggingConfiguration AddDefaultFileTarget(LoggingConfiguration loggerconfig, string LoggerName)
+        public LoggingConfiguration AddDefaultFileTarget(LoggingConfiguration loggerconfig, string LoggerName, bool IsAsync = false)
         {
             if (loggerconfig is null) throw new ArgumentNullException(nameof(AddDefaultFileTarget));
 
@@ -77,12 +78,12 @@ namespace MyLoggingUnit.Core.DefaultConfiguration
             FileConfig.FileTargetConfig.FileName = SetDirectoryPathEnding("Log\\Log_${shortdate}.txt");
             FileConfig.FileTargetConfig.Layout = "${longdate} ${uppercase:${level}} ${logger} => ${message}";
             FileConfig.FileTargetConfig.Name = "Flowlogfile";
-            loggerconfig.AddRule(FileConfig!.TargetName, FileConfig.TargetLogLevel, FileConfig.FileTargetConfig, LoggerName);
+            loggerconfig.AddRule(FileConfig!.TargetName, FileConfig.TargetLogLevel, FileConfig.FileTargetConfig, LoggerName, IsAsync);
 
             return loggerconfig;
 
         }
-        public LoggingConfiguration AddDefaultErrorFileTarget(LoggingConfiguration loggerConfig, string LoggerName)
+        public LoggingConfiguration AddDefaultErrorFileTarget(LoggingConfiguration loggerConfig, string LoggerName, bool IsAsync = false)
         {
             if (loggerConfig is null) throw new ArgumentNullException(nameof(AddDefaultErrorFileTarget));
 
@@ -95,52 +96,49 @@ namespace MyLoggingUnit.Core.DefaultConfiguration
             FileConfig.FileTargetConfig.Name = "Errorlogfile";
             FileConfig.TargetName = "Errorlogfile";
             FileConfig.TargetLogLevel = LogLevel.Error;
-            loggerConfig.AddRule(FileConfig!.TargetName, FileConfig.TargetLogLevel, FileConfig.FileTargetConfig!, LoggerName);
+            loggerConfig.AddRule(FileConfig!.TargetName, FileConfig.TargetLogLevel, FileConfig.FileTargetConfig!, LoggerName, IsAsync);
 
             return loggerConfig;
         }
 
-
+        public class SeqSettings {
+            public int My_ServerUrl { get; set; }
+            public int MyProperty { get; set; }
+            List<SeqPropertyItem> seqPropertyItems { get; set; } = new List<SeqPropertyItem>();
+        }
         public BufferingTargetWrapper BuildDefaultSeqTarget()
         {
             SeqConfig = new SeqConfiguration();
+
             var seqTarget = new SeqTarget()
             {
-                ServerUrl = "http://localhost:5341",
-                ApiKey = "",
+                ServerUrl = SeqConfig.ServerUrl,
+                ApiKey = SeqConfig.ApiKey,
             };
 
-            seqTarget.Properties.Add(new SeqPropertyItem
+            foreach (var item in SeqConfig.Properties)
             {
-                Name = "Application",
-                As = "Application",
-                Value = "MinimalApi",
-            });
-
-            seqTarget.Properties.Add(new SeqPropertyItem
-            {
-                Name = "Environment",
-                As = "Environment",
-                Value = "Development",
-            });
+                seqTarget.Properties.Add(item);
+            }
+           
             BufferingTargetWrapper bufferingTarget = new();
 
             bufferingTarget!.BufferSize = 1024;
             bufferingTarget!.FlushTimeout = 2000;
             bufferingTarget!.SlidingTimeout = false;
             bufferingTarget!.WrappedTarget = seqTarget;
-
+           
             return bufferingTarget!;
 
         }
 
 
 
-        public LoggingConfiguration AddSeqTarget(LoggingConfiguration loggerconfig, BufferingTargetWrapper buffering, string LoggerName)
+        public LoggingConfiguration AddSeqTarget(LoggingConfiguration loggerconfig, BufferingTargetWrapper buffering, string LoggerName, bool IsAsync = true)
         {
 
             if (buffering is null || loggerconfig is null) throw new ArgumentNullException(nameof(AddSeqTarget));
-            loggerconfig.AddRule(SeqConfig!.TargetName, SeqConfig.TargetLogLevel, buffering, LoggerName);
+            loggerconfig.AddRule(SeqConfig!.TargetName, SeqConfig.TargetLogLevel, buffering, LoggerName, IsAsync);
             return loggerconfig;
 
         }
