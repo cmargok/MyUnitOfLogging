@@ -1,7 +1,8 @@
+using K.Loggger.Client.Logger;
 using Microsoft.AspNetCore.Mvc;
-using MyLoggingUnit.Logger;
 
-namespace WebApplication1.Controllers { 
+namespace WebApplication1.Controllers
+{
 
 
 

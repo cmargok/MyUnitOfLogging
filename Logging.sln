@@ -7,7 +7,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitOfLogging", "UnitOfLogg
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{012149BF-D38B-4FA2-A062-EA1BC7028C68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLoggingUnit", "MyLoggingUnit\MyLoggingUnit.csproj", "{EEB29530-C6F0-4942-84F2-3B9DD33A0B80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyLoggingUnit", "MyLoggingUnit\MyLoggingUnit.csproj", "{EEB29530-C6F0-4942-84F2-3B9DD33A0B80}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Old_Implementation", "Old_Implementation", "{E446A1CF-154A-47DE-99E1-71F25266EAFA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "K.Loggger.Client", "K.Log.Client\K.Loggger.Client.csproj", "{A9816AB7-A814-4DAA-867D-FBC20324EEC2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "K.Logger.Core", "K.Log.Core\K.Logger.Core.csproj", "{ECBCC744-9757-4093-943A-321860F4B8D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,9 +33,21 @@ Global
 		{EEB29530-C6F0-4942-84F2-3B9DD33A0B80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEB29530-C6F0-4942-84F2-3B9DD33A0B80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEB29530-C6F0-4942-84F2-3B9DD33A0B80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9816AB7-A814-4DAA-867D-FBC20324EEC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9816AB7-A814-4DAA-867D-FBC20324EEC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9816AB7-A814-4DAA-867D-FBC20324EEC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9816AB7-A814-4DAA-867D-FBC20324EEC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECBCC744-9757-4093-943A-321860F4B8D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECBCC744-9757-4093-943A-321860F4B8D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECBCC744-9757-4093-943A-321860F4B8D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECBCC744-9757-4093-943A-321860F4B8D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{79D727FF-F40E-4A61-9B22-9F3AF08FF973} = {E446A1CF-154A-47DE-99E1-71F25266EAFA}
+		{EEB29530-C6F0-4942-84F2-3B9DD33A0B80} = {E446A1CF-154A-47DE-99E1-71F25266EAFA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {608D18C1-9E61-4E86-86FA-B46D411A8F61}

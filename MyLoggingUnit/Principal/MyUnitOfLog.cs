@@ -24,7 +24,7 @@ namespace MyLoggingUnit.Principal
         {
             _Services = services;
             _LogBuilder = new LogBuilder();
-            _Configuration = configuration;
+            _Configuration = configuration; 
         }
 
 
