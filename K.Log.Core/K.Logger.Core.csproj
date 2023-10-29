@@ -17,4 +17,8 @@
     <ProjectReference Include="..\ahuevo\ahuevo.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Configuration\" />
+  </ItemGroup>
+
 </Project>

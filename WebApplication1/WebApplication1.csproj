@@ -24,7 +24,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\K.Log.Client\K.Loggger.Client.csproj" />
-    <ProjectReference Include="..\K.Log.Core\K.Logger.Core.csproj" />
   </ItemGroup>
+
+
 
 </Project>

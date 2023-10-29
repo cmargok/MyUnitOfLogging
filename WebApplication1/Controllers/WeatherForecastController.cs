@@ -37,7 +37,19 @@ namespace WebApplication1.Controllers
             catch (Exception e)
             {
                 _log.LoggingError(e,"Soy UN errorrsote");
-               
+                _log.LoggingError(e, "Soy UN errorrsote");
+                _log.LoggingError(e, "Soy UN asa");
+                _log.LoggingError(e, "Soy UN errorrsote");
+                _log.LoggingError(e, "Soy UN errorrsote");
+
+                _log.LoggingError(e, "Soy UN errorrsote");
+                _log.LoggingError(e, "Soy UN errorrsote");
+
+                _log.LoggingError(e, "Soy UN errorrsote");
+                _log.LoggingError(e, "Soy UN errorrsote");
+                _log.LoggingError(e, "Soy UN errorrsote");
+             
+
             }
             
 

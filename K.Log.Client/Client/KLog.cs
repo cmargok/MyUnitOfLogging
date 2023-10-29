@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using K.Logger.Core.Configuration;
-using Microsoft.Extensions.Configuration;
-using ahuevo;
+﻿
 using Serilog.Formatting.Json;
 using Serilog;
 using K.Loggger.Client.Logger;
@@ -12,6 +9,9 @@ using Serilog.Formatting;
 using Serilog.Sinks.PeriodicBatching;
 using System.Text;
 using Newtonsoft.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Kbusbus;
+using K.Logger.Core.Tools;
 
 
 
@@ -21,13 +21,13 @@ namespace K.Logger.Client.Client
     {
         private readonly IServiceCollection _services;
 
-        private RabbitMQClientConfiguration _eventSettings;
+        private EventClientConfiguration _eventSettings;
 
 
         private KLog(IServiceCollection services)
         {
             _services = services;
-            _eventSettings = new RabbitMQClientConfiguration();
+            _eventSettings = new EventClientConfiguration();
         }
 
         public static KLog CreateClient(IServiceCollection services)
@@ -35,7 +35,7 @@ namespace K.Logger.Client.Client
             return new KLog(services);
         }
 
-        public KLog AddSettings(RabbitMQClientConfiguration eventSettings)
+        public KLog AddSettings(EventClientConfiguration eventSettings)
         {
             _eventSettings = eventSettings;
             return this;
@@ -45,7 +45,7 @@ namespace K.Logger.Client.Client
         public KLog RegisterKLog()
         {
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.RabbitMQ((clientConfiguration, sinkConfiguration) =>
+                .WriteTo.RabbitMQkLok((clientConfiguration, sinkConfiguration) =>
             {
                 clientConfiguration.From(_eventSettings!);
                 sinkConfiguration.TextFormatter = new JsonFormatter();
@@ -64,12 +64,11 @@ namespace Kbusbus
 {
     public static class loggerExtender
     {
-        private const int DefaultBatchPostingLimit = 50;
-        private static readonly TimeSpan DefaultPeriod = TimeSpan.FromSeconds(2);
-        public static LoggerConfiguration ADDmikuka(this LoggerSinkConfiguration loggerConfiguration, Action<EventClientConfiguration, RabbitMQSinkConfiguration> configure)
+        public static LoggerConfiguration RabbitMQkLok(this LoggerSinkConfiguration loggerConfiguration, Action<EventClientConfiguration, RabbitMQSinkConfiguration> configure)
         {
-            EventClientConfiguration clientConfiguration = new EventClientConfiguration();
-            RabbitMQSinkConfiguration sinkConfiguration = new RabbitMQSinkConfiguration();
+            EventClientConfiguration clientConfiguration = new ();
+            RabbitMQSinkConfiguration sinkConfiguration = new ();
+
             configure(clientConfiguration, sinkConfiguration);
 
             ValidateSettings(loggerConfiguration, clientConfiguration, sinkConfiguration);
@@ -79,13 +78,12 @@ namespace Kbusbus
                 BatchSizeLimit = sinkConfiguration.BatchPostingLimit,
                 Period = sinkConfiguration.Period,
                 EagerlyEmitFirstEvent = true,
-                QueueLimit = 50
+                QueueLimit = sinkConfiguration.QueueLimit,
+               
             };
 
-            var RabbitMQSink = new PeriodicBatchingSink(new RabbitMQBatchSink(clientConfiguration), batchingOptions);
+            var RabbitMQSink = new PeriodicBatchingSink(new RabbitMQBatchSink(clientConfiguration, sinkConfiguration), batchingOptions);
             return loggerConfiguration.Sink(RabbitMQSink, sinkConfiguration.RestrictedToMinimumLevel);
-
-          
 
         }
 
@@ -97,45 +95,19 @@ namespace Kbusbus
             if (string.IsNullOrEmpty(clientConfiguration.Username)) throw new ArgumentException("username cannot be 'null' or and empty string.");
             if (clientConfiguration.Password == null) throw new ArgumentException("password cannot be 'null'. Specify an empty string if password is empty.");
             if (clientConfiguration.Port <= 0 || clientConfiguration.Port > 65535) throw new ArgumentOutOfRangeException("port", "port must be in a valid range (1 and 65535)");
-
-            sinkConfiguration.BatchPostingLimit = (sinkConfiguration.BatchPostingLimit == default(int)) ? DefaultBatchPostingLimit : sinkConfiguration.BatchPostingLimit;
-            sinkConfiguration.Period = (sinkConfiguration.Period == default(TimeSpan)) ? DefaultPeriod : sinkConfiguration.Period;
+                      
         }
 
     }
-    public class EventClientConfiguration
-    {
-        public IList<string> Hostnames { get; } = new List<string>();
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public string Exchange { get; set; } = string.Empty;
-        public string ExchangeType { get; set; } = string.Empty;
-        public RabbitMQDeliveryMode DeliveryMode { get; set; } = RabbitMQDeliveryMode.NonDurable;
-        public string RouteKey { get; set; } = string.Empty;
-        public int Port { get; set; }
-        public string ApiName { get; set; } = string.Empty;
-
-        public EventClientConfiguration From(EventClientConfiguration config)
-        {
-            Username = config.Username;
-            Password = config.Password;
-            Exchange = config.Exchange;
-            ExchangeType = config.ExchangeType;
-            DeliveryMode = config.DeliveryMode;
-            RouteKey = config.RouteKey;
-            foreach (string hostName in config.Hostnames)
-            {
-                Hostnames.Add(hostName);
-            }
-            return this;
-        }
-    }
+   
     public class RabbitMQSinkConfiguration
     {
-        public int BatchPostingLimit { get; set; }
-        public TimeSpan Period { get; set; }
+        public int BatchPostingLimit { get; set; } = 50;
+        public TimeSpan Period { get; set; } = TimeSpan.FromSeconds(20);
         public ITextFormatter TextFormatter { get; set; } = new JsonFormatter();
         public LogEventLevel RestrictedToMinimumLevel { get; set; } = LogEventLevel.Verbose;
+        public int QueueLimit { get; set; } = 50;
+
     }
 
     public class EventTo
@@ -151,21 +123,24 @@ namespace Kbusbus
        
     }
 
- 
+
     public class RabbitMQBatchSink : IBatchedLogEventSink
     {
         private readonly EventClientConfiguration _configuration;
         private readonly ITextFormatter _formatter;
         private EventTo _eventTo;
-        public RabbitMQBatchSink(EventClientConfiguration configuration)
+        private List<EventTo> strings = new List<EventTo>();
+        public RabbitMQBatchSink(EventClientConfiguration configuration, RabbitMQSinkConfiguration rabbitMQSinkConfiguration)
         {
             _configuration = configuration;
+            _formatter = rabbitMQSinkConfiguration.TextFormatter;
+            _eventTo = new(configuration.ApiName);
 
         }
 
         public async Task EmitBatchAsync(IEnumerable<LogEvent> batch)
         {
-            using var client = new RabbitMQClient(_configuration);
+            //using var client = new RabbitMQClient(_configuration);
 
             foreach (var logEvent in batch)
             {
@@ -173,15 +148,25 @@ namespace Kbusbus
 
                 _formatter.Format(logEvent, stringWriter);
 
+                _eventTo.ApiLog = null!;
+
                 _eventTo.ApiLog = stringWriter.ToString();
 
-                await client.PublishAsync(_eventTo);
+                strings.Add(_eventTo);
+
+                //  await client.PublishAsync(_eventTo);
             }
+
+            if (strings.Count > 50)
+            {
+                await Console.Out.WriteLineAsync("chupemelo");
+            }
+            await Console.Out.WriteLineAsync(strings.Count.ToString());
         }
         public async Task OnEmptyBatchAsync()
         {
-           
-          
+            await Console.Out.WriteLineAsync( "porque estoy solito");
+
         }
     }
 
@@ -255,7 +240,7 @@ namespace Kbusbus
 
                 if (channel == null)
                 {
-                   using var connection = await GetConnectionAsync();
+                   var connection = await GetConnectionAsync();
 
                     channel = connection.CreateModel();
 
